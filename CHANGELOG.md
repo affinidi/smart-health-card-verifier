@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.0.25](https://gitlab.com/affinidi/safe-travel/st-experiments/health-card-verifier-mobile/compare/v1.0.24...v1.0.25) (2021-09-02)
+
+
+### Bug Fixes
+
+* remove duplicate privacy policy ([5384f02](https://gitlab.com/affinidi/safe-travel/st-experiments/health-card-verifier-mobile/commit/5384f02cad10852202192a78fe551bcd7a78fc4f))
+* return doses in order by date ([061fc57](https://gitlab.com/affinidi/safe-travel/st-experiments/health-card-verifier-mobile/commit/061fc576044960c130755262317b391518cb8a87))
+
 ### [1.0.24](https://gitlab.com/st-experiments/health-card-verifier-mobile/compare/v1.0.23...v1.0.24) (2021-08-30)
 
 
