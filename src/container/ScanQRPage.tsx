@@ -3,6 +3,7 @@ import { View, StyleSheet, Animated, Easing, Alert, Platform } from 'react-nativ
 import { useNetInfo } from '@react-native-community/netinfo'
 import { BarCodeScanner } from 'expo-barcode-scanner'
 import * as Device from 'expo-device';
+import * as Location from 'expo-location';
 import { ErrorCode } from '../error'
 import { Props } from '../../types'
 import AppClickableImage from '../components/customImage'
@@ -17,7 +18,8 @@ const images = {
 }
 
 const ScanQRPage = ({ navigation }: Props) => {
-  const [hasPermission, setHasPermission] = useState(null)
+  const [hasCameraPermission, setHasCameraPermission] = useState<boolean>(null)
+  const [hasLocationPermission, setHasLocationPermission] = useState<boolean>(null)
   const [scanned, setScanned] = useState(false)
   const [spinAnimation, setSpinAnimation] = useState(new Animated.Value(0))
   const [cameraType, setCameraType] = React.useState(BarCodeScanner.Constants.Type.back)
@@ -33,9 +35,10 @@ const ScanQRPage = ({ navigation }: Props) => {
       const OS = Device.osName?.toLowerCase()
 
       if (OS === 'android') {
-        const permission = await BarCodeScanner.getPermissionsAsync()
+        const cameraPermission = await BarCodeScanner.getPermissionsAsync()
+        const locationPermission = await Location.getForegroundPermissionsAsync()
 
-        if (!permission.granted) {
+        if (!cameraPermission.granted) {
           Alert.alert(
             'Camera Permission',
             'This app uses the camera to scan QR codes with COVID-19 vaccine certificates. This allows verifiers to verify the authenticity of COVID-19 vaccine certificates presented to them.',
@@ -47,7 +50,7 @@ const ScanQRPage = ({ navigation }: Props) => {
               },
               { text: 'OK', onPress: async () => {
                   const { status } = await BarCodeScanner.requestPermissionsAsync()
-                  setHasPermission(status === 'granted')
+                  setHasCameraPermission(status === 'granted')
                 }
               }
             ],
@@ -55,11 +58,37 @@ const ScanQRPage = ({ navigation }: Props) => {
           )
         } else {
           const { status } = await BarCodeScanner.requestPermissionsAsync()
-          setHasPermission(status === 'granted')
+          setHasCameraPermission(status === 'granted')
+        }
+
+        if (!locationPermission.granted) {
+          Alert.alert(
+              'Location Permission',
+              'When the app is in use, the Smart Health Card Verifier App accesses data about your internet network (SSID/BSSID) to ensure you have a working internet connection. Data about your internet network is not stored.',
+              [
+                {
+                  text: 'Cancel',
+                  onPress: () => navigation.navigate('Welcome'),
+                  style: 'cancel'
+                },
+                { text: 'OK', onPress: async () => {
+                    const { status } = await Location.requestForegroundPermissionsAsync()
+                    setHasLocationPermission(status === 'granted')
+                  }
+                }
+              ],
+              { cancelable: false }
+          )
+        } else {
+          const { status } = await Location.requestForegroundPermissionsAsync()
+          setHasLocationPermission(status === 'granted')
         }
       } else {
-        const { status } = await BarCodeScanner.requestPermissionsAsync()
-        setHasPermission(status === 'granted')
+        const { status: cameraPermissionStatus } = await BarCodeScanner.requestPermissionsAsync()
+        setHasCameraPermission(cameraPermissionStatus === 'granted')
+
+        const { status: locationPermissionStatus } = await Location.requestForegroundPermissionsAsync()
+        setHasLocationPermission(locationPermissionStatus === 'granted')
       }
     })()
   }, [])
@@ -117,17 +146,21 @@ const ScanQRPage = ({ navigation }: Props) => {
 
   const { isInternetReachable } = useNetInfo()
 
-  const showCamera = hasPermission && isInternetReachable && !scanned
+  const showCamera = hasCameraPermission && hasLocationPermission && isInternetReachable && !scanned
+
+  const renderAccessError = () => {
+    {/* TODO: Cover scenario when camera permissions disallowed later. NOTE: The below shows our modal behind system's modal. */}
+    if (!hasCameraPermission)
+      return <NotificationOverlay type={'noCameraAccess'} navigation={navigation}/>
+
+    if (!hasLocationPermission)
+      return <NotificationOverlay type={'noLocationAccess'} navigation={navigation}/>
+  }
 
   return (
-    <View style={styles.container}>
+      <View style={styles.container}>
       <View style={styles.scannerContainer}>
-
-        {/* TODO: Cover scenario when camera permissions disallowed later.
-            NOTE: The below shows our modal behind system's modal. */}
-        {!hasPermission &&
-          <NotificationOverlay type={'noCameraAccess'} navigation={navigation}/>
-        }
+        {renderAccessError()}
 
         {/* TODO: Find a better netinfo module as the check for internet connection fires three times when it is called */}
         {isInternetReachable === false &&
