@@ -1,5 +1,9 @@
 # How to contribute to SMART Health Card Verifier <!-- omit in toc -->
 
+Contributions to this project are [released](https://help.github.com/articles/github-terms-of-service/#6-contributions-under-repository-license) to the public under the [project's open source license](LICENSE).
+
+Documentation and wiki pages are licensed under the [Creative Commons Attribution 4.0 International License][cc-by].
+
 In this guide you will get an overview of the contribution workflow from opening an issue, creating a PR, reviewing, and merging the PR.
 
 ## Semantic Versioning
@@ -92,3 +96,13 @@ If you decide to fix an issue, please be sure to check the comment thread in cas
 3. Make changes and test
 4. Ensure you code is formtted with our [prettier](https://github.com/prettier/prettier) config.
 5. Submit Pull Request with comprehensive description of changes
+
+## Documentation
+If you feel you need to add some documentation with or without examples, place these under [./docs](./docs)) folder in MarkDown format.
+
+---
+
+[![CC BY 4.0][cc-by-image]][cc-by]
+
+[cc-by]: http://creativecommons.org/licenses/by/4.0/
+[cc-by-image]: https://i.creativecommons.org/l/by/4.0/88x31.png
